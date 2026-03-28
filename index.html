@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BioLogic AI — Agencia de IA para el Sector Salud</title>
+  <meta name="description" content="Automatizá tu clínica con Agentes de IA. Gestión de turnos, validación de órdenes médicas y triaje inteligente. Para clínicas y consultorios en Argentina." />
+
+  <!-- Google Fonts: Instrument Serif (headlines) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy:  { DEFAULT: '#0A2540', light: '#1A3D5C', dark: '#061828' },
+            teal:  { DEFAULT: '#00B4D8', light: '#48CAE4', dark: '#0096C7' },
+            slate: { DEFAULT: '#E8F4FD', mid: '#C9E4F4', dark: '#8DB5CC' },
+            ink:   '#1A2332',
+          },
+          fontFamily: {
+            serif: ['"Instrument Serif"', 'Georgia', 'serif'],
+            sans:  ['"DM Sans"', 'system-ui', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: #FAFCFF; color: #1A2332; overflow-x: hidden; }
+
+    /* ── Mesh gradient hero bg ── */
+    .hero-bg {
+      background-color: #0A2540;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 10% 20%, rgba(0,180,216,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 90% 80%, rgba(0,150,199,0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 50% 0%,  rgba(72,202,228,0.10) 0%, transparent 50%);
+    }
+    .dot-grid {
+      background-image: radial-gradient(circle, rgba(0,180,216,0.12) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .diagonal-divider { clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%); padding-bottom: 6rem; }
+
+    /* ── Service cards ── */
+    .service-card { position: relative; border: 1px solid rgba(0,180,216,0.15); transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; }
+    .service-card:hover { transform: translateY(-6px); box-shadow: 0 20px 48px rgba(0,180,216,0.12), 0 4px 16px rgba(10,37,64,0.08); border-color: rgba(0,180,216,0.45); }
+    .service-card .icon-ring { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(0,180,216,0.15), rgba(0,150,199,0.08)); border: 1px solid rgba(0,180,216,0.25); font-size: 1.5rem; }
+
+    /* ── Comparison table ── */
+    .compare-row td { padding: 14px 20px; font-size: 0.95rem; }
+    .compare-row:not(:last-child) { border-bottom: 1px solid #E8F4FD; }
+    .col-old   { background: #FFF8F8; color: #C0392B; }
+    .col-new   { background: #F0FBF9; color: #0B7A75; }
+    .col-label { background: #FAFCFF; color: #1A2332; font-weight: 500; }
+
+    /* ── WhatsApp demo ── */
+    .wa-screen { background: #E5DDD5; background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8b9ab' fill-opacity='0.18'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+    .wa-header { background: #1F7A4D; color: white; }
+    .bubble { max-width: 78%; padding: 10px 14px; font-size: 0.875rem; line-height: 1.5; }
+    .bubble-patient { background: white; border-radius: 0px 12px 12px 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.13); }
+    .bubble-ai      { background: #D9FDD3; border-radius: 12px 0px 12px 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.13); }
+    .bubble-time    { font-size: 0.68rem; color: rgba(0,0,0,0.4); text-align: right; margin-top: 2px; }
+
+    /* Chat staggered animation */
+    .chat-msg { opacity: 0; animation: msgIn 0.4s ease forwards; }
+    .chat-msg:nth-child(1) { animation-delay: 0.4s; }
+    .chat-msg:nth-child(2) { animation-delay: 1.1s; }
+    .chat-msg:nth-child(3) { animation-delay: 1.9s; }
+    .chat-msg:nth-child(4) { animation-delay: 2.8s; }
+    .chat-msg:nth-child(5) { animation-delay: 3.7s; }
+    .chat-msg:nth-child(6) { animation-delay: 4.6s; }
+    @keyframes msgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    /* ── Scroll reveal ── */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── Form ── */
+    .form-input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1.5px solid #C9E4F4; background: white; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: #1A2332; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .form-input:focus { border-color: #00B4D8; box-shadow: 0 0 0 3px rgba(0,180,216,0.12); }
+    .form-input::placeholder { color: #8DB5CC; }
+
+    /* ── Buttons ── */
+    .btn-glow { background: linear-gradient(135deg, #00B4D8, #0096C7); color: white; font-weight: 600; letter-spacing: 0.02em; border-radius: 12px; padding: 14px 32px; box-shadow: 0 4px 24px rgba(0,180,216,0.35); transition: transform 0.2s, box-shadow 0.2s; display: inline-block; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; font-size: 1rem; }
+    .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,180,216,0.45); }
+    .btn-ghost { border: 1.5px solid rgba(255,255,255,0.3); color: white; border-radius: 12px; padding: 13px 28px; font-weight: 500; transition: background 0.2s, border-color 0.2s; display: inline-block; }
+    .btn-ghost:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.5); }
+
+    /* ── Misc ── */
+    .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; padding: 6px 14px; border-radius: 999px; }
+    .stat-card { border: 1px solid rgba(0,180,216,0.2); background: rgba(255,255,255,0.04); border-radius: 16px; padding: 24px 20px; text-align: center; }
+    .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #00B4D8, #0096C7); display: flex; align-items: center; justify-content: center; }
+    .nav-scroll { backdrop-filter: blur(12px); background: rgba(10,37,64,0.92); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ NAVBAR ═══════════ -->
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-3">
+      <div class="logo-mark">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M5 3C5 3 8 5.5 10 10C12 14.5 15 17 15 17" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M15 3C15 3 12 5.5 10 10C8 14.5 5 17 5 17" stroke="rgba(255,255,255,0.5)" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="6.5" y1="6.5" x2="13.5" y2="6.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="5.5" y1="10" x2="14.5" y2="10" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="6.5" y1="13.5" x2="13.5" y2="13.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="font-sans font-semibold text-white text-lg tracking-tight">BioLogic <span class="text-teal-400">AI</span></span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm text-white/70">
+      <a href="#problema" class="hover:text-teal-400 transition-colors">El Problema</a>
+      <a href="#servicios" class="hover:text-teal-400 transition-colors">Servicios</a>
+      <a href="#demo" class="hover:text-teal-400 transition-colors">Demo</a>
+      <!-- ── LINK: Reemplazar con tu link de Calendly, WhatsApp o formulario ── -->
+      <a href="#contacto" class="btn-glow !py-2.5 !px-5 !rounded-lg !text-sm">Hablar con un experto</a>
+    </div>
+    <button id="menuBtn" class="md:hidden text-white p-2">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+  <div id="mobileMenu" class="hidden md:hidden bg-navy-DEFAULT px-6 pb-5 flex flex-col gap-4 text-sm text-white/80" style="background:#0A2540;">
+    <a href="#problema" class="hover:text-teal-400 py-1">El Problema</a>
+    <a href="#servicios" class="hover:text-teal-400 py-1">Servicios</a>
+    <a href="#demo" class="hover:text-teal-400 py-1">Demo</a>
+    <a href="#contacto" class="btn-glow text-center mt-2">Solicitar Auditoría</a>
+  </div>
+</nav>
+
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero-bg diagonal-divider min-h-screen flex items-center relative overflow-hidden">
+  <div class="dot-grid absolute inset-0 opacity-60 pointer-events-none"></div>
+  <div class="absolute -top-32 -right-32 w-96 h-96 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(0,180,216,0.12), transparent 70%);"></div>
+  <div class="absolute -bottom-16 -left-24 w-80 h-80 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(0,150,199,0.10), transparent 70%);"></div>
+
+  <div class="max-w-6xl mx-auto px-6 py-32 md:py-44 w-full relative z-10">
+    <div class="max-w-3xl">
+      <div class="badge bg-teal-400/10 text-teal-300 border border-teal-400/25 mb-8" style="color:#48CAE4; border-color:rgba(0,180,216,0.3); background:rgba(0,180,216,0.1);">
+        <span class="w-1.5 h-1.5 rounded-full animate-pulse inline-block" style="background:#48CAE4;"></span>
+        Agencia de IA · Sector Salud Argentina
+      </div>
+
+      <h1 class="font-serif text-5xl md:text-7xl text-white leading-[1.08] mb-6">
+        Menos burocracia.<br/>
+        <span class="italic" style="color:#48CAE4;">Más medicina.</span>
+      </h1>
+
+      <p class="text-white/70 text-lg md:text-xl font-light leading-relaxed mb-10 max-w-2xl">
+        Implementamos <strong class="text-white/90 font-medium">Agentes de IA</strong> en tu clínica o consultorio para automatizar el triaje, la gestión de turnos por WhatsApp y la validación de órdenes médicas. Sin fricción. Sin código. Sin burocracia.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4">
+        <!-- ── LINK: Reemplazar con tu Calendly o anchor del formulario ── -->
+        <a href="#contacto" class="btn-glow text-center">Solicitar Auditoría Gratuita →</a>
+        <a href="#demo" class="btn-ghost text-center">Ver Demo en vivo</a>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-4 mt-14 max-w-xl">
+        <div class="stat-card">
+          <div class="font-serif text-3xl" style="color:#48CAE4;">70%</div>
+          <div class="text-white/50 text-xs mt-1">menos llamadas<br/>administrativas</div>
+        </div>
+        <div class="stat-card">
+          <div class="font-serif text-3xl" style="color:#48CAE4;">24/7</div>
+          <div class="text-white/50 text-xs mt-1">atención<br/>sin personal extra</div>
+        </div>
+        <div class="stat-card">
+          <div class="font-serif text-3xl" style="color:#48CAE4;">&lt;48h</div>
+          <div class="text-white/50 text-xs mt-1">implementación<br/>del primer agente</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════ PROBLEMA / SOLUCIÓN ═══════════ -->
+<section id="problema" class="bg-white py-24 px-6">
+  <div class="max-w-5xl mx-auto reveal">
+    <div class="text-center mb-14">
+      <div class="badge bg-red-50 text-red-500 border border-red-100 mb-5 mx-auto">El diagnóstico</div>
+      <h2 class="font-serif text-4xl md:text-5xl mb-4" style="color:#0A2540;">Tu clínica gasta horas<br/><span class="italic">en tareas que una IA puede resolver</span></h2>
+      <p class="text-ink/60 max-w-xl mx-auto text-base" style="color:rgba(26,35,50,0.6);">El sistema de salud en Argentina aún depende de procesos manuales que consumen tiempo, generan errores y frustran a los pacientes.</p>
+    </div>
+
+    <div class="rounded-2xl overflow-hidden shadow-md border" style="border-color:#C9E4F4;">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr>
+            <th class="py-4 px-5 text-left text-sm font-medium w-2/5" style="background:rgba(201,228,244,0.5); color:rgba(26,35,50,0.6);">Proceso</th>
+            <th class="py-4 px-5 text-center text-sm font-semibold bg-red-50 text-red-500">😩 Sistema Actual</th>
+            <th class="py-4 px-5 text-center text-sm font-semibold bg-green-50 text-green-600">✨ Con BioLogic AI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- ── Agregá o quitá filas según los procesos de tu cliente target ── -->
+          <tr class="compare-row"><td class="col-label">Gestión de turnos</td><td class="col-old text-center">Llamadas telefónicas, largas esperas, errores humanos</td><td class="col-new text-center">Agente de WhatsApp agenda, confirma y recuerda el turno solo</td></tr>
+          <tr class="compare-row"><td class="col-label">Validación de órdenes médicas</td><td class="col-old text-center">Revisión manual, foto por WhatsApp, pérdida de documentos</td><td class="col-new text-center">OCR + IA valida en segundos: obra social, diagnóstico y vigencia</td></tr>
+          <tr class="compare-row"><td class="col-label">Triaje inicial</td><td class="col-old text-center">Recepcionista saturada, sin criterio clínico uniforme</td><td class="col-new text-center">Bot clasifica urgencia y redirige al especialista correcto</td></tr>
+          <tr class="compare-row"><td class="col-label">Recordatorios y confirmaciones</td><td class="col-old text-center">Staff dedica 2+ horas diarias a llamar pacientes</td><td class="col-new text-center">Mensajes automáticos 24 hs antes, con link de confirmación</td></tr>
+          <tr class="compare-row"><td class="col-label">Consultas frecuentes</td><td class="col-old text-center">Tel. ocupado, paciente llama 3 veces, se va a otra clínica</td><td class="col-new text-center">FAQ respondidas al instante, escalado solo si es necesario</td></tr>
+          <tr class="compare-row" style="border-bottom:none;"><td class="col-label">Disponibilidad</td><td class="col-old text-center">Lunes a viernes, horario de oficina</td><td class="col-new text-center font-semibold">365 días · 24 horas · 0 horas extra</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════ SERVICIOS ═══════════ -->
+<section id="servicios" class="py-24 px-6" style="background:#E8F4FD;">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-14 reveal">
+      <div class="badge mb-5 mx-auto" style="background:rgba(0,180,216,0.1); color:#0096C7; border:1px solid rgba(0,180,216,0.25);">Nuestros servicios</div>
+      <h2 class="font-serif text-4xl md:text-5xl mb-4" style="color:#0A2540;">Tres agentes.<br/><span class="italic">Un solo objetivo: liberar tu tiempo.</span></h2>
+      <p class="max-w-lg mx-auto" style="color:rgba(26,35,50,0.6);">Cada producto se integra en días, sin reemplazar tu sistema actual.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+
+      <!-- Card 1 -->
+      <div class="service-card bg-white rounded-2xl p-7 reveal">
+        <div class="icon-ring mb-5">📱</div>
+        <h3 class="font-sans font-semibold text-xl mb-3" style="color:#0A2540;">Agente de Turnos<br/>por WhatsApp</h3>
+        <p class="text-sm leading-relaxed mb-5" style="color:rgba(26,35,50,0.6);">Tu paciente escribe por WhatsApp y en menos de 30 segundos tiene su turno confirmado, con recordatorios automáticos y opción de reprogramar sin llamar.</p>
+        <ul class="text-sm space-y-2" style="color:rgba(26,35,50,0.7);">
+          <li class="flex items-start gap-2"><span style="color:#00B4D8;" class="mt-0.5">✓</span> Integración con tu agenda existente</li>
+          <li class="flex items-start gap-2"><span style="color:#00B4D8;" class="mt-0.5">✓</span> Recordatorio 24 y 2 hs antes del turno</li>
+          <li class="flex items-start gap-2"><span style="color:#00B4D8;" class="mt-0.5">✓</span> Detección de cancelaciones y relleno automático</li>
+        </ul>
+        <!-- ── LINK: Agregar link a demo o página de detalle de este servicio ── -->
+        <a href="#contacto" class="mt-6 inline-block text-sm font-medium hover:underline" style="color:#00B4D8;">Conocer más →</a>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="service-card bg-white rounded-2xl p-7 reveal" style="transition-delay:0.1s">
+        <div class="icon-ring mb-5">📄</div>
+        <h3 class="font-sans font-semibold text-xl mb-3" style="color:#0A2540;">Validador de<br/>Órdenes Médicas (OCR)</h3>
+        <p class="text-sm leading-relaxed mb-5" style="color:rgba(26,35,50,0.6);">El paciente envía una foto de su orden médica. La IA extrae datos, verifica la obra social, diagnóstico y vigencia, y responde si es apta para atención en segundos.</p>
+        <ul class="text-sm space-y-2" style="color:rgba(26,35,50,0.7);">
+          <li class="flex items-start gap-2"><span style="color:#00B4D8;" class="mt-0.5">✓</span> Reconocimiento óptico de caracteres (OCR)</li>
+          <li class="flex items-start gap-2"><span style="color:#00B4D8;" class="mt-0.5">✓</span> Validación contra base de coberturas</li>
+          <li class="flex items-start gap-2"><span style="color:#00B4D8;" class="mt-0.5">✓</span> Archivo digital automático por paciente</li>
+        </ul>
+        <a href="#contacto" class="mt-6 inline-block text-sm font-medium hover:underline" style="color:#00B4D8;">Conocer más →</a>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="service-card bg-white rounded-2xl p-7 reveal" style="transition-delay:0.2s">
+        <div class="icon-ring mb-5">🩺</div>
+        <h3 class="font-sans font-semibold text-xl mb-3" style="color:#0A2540;">Asistente de<br/>Triaje Inteligente</h3>
+        <p class="text-sm leading-relaxed mb-5" style="color:rgba(26,35,50,0.6);">Antes de llegar a la clínica, el paciente completa un triaje conversacional. La IA clasifica la urgencia y pre-carga la información para la recepción.</p>
+        <ul class="text-sm space-y-2" style="color:rgba(26,35,50,0.7);">
+          <li class="flex items-start gap-2"><span style="color:#00B4D8;" class="mt-0.5">✓</span> Protocolo adaptable a tu especialidad</li>
+          <li class="flex items-start gap-2"><span style="color:#00B4D8;" class="mt-0.5">✓</span> Resumen clínico pre-generado para el médico</li>
+          <li class="flex items-start gap-2"><span style="color:#00B4D8;" class="mt-0.5">✓</span> Escala de urgencia con derivación automática</li>
+        </ul>
+        <a href="#contacto" class="mt-6 inline-block text-sm font-medium hover:underline" style="color:#00B4D8;">Conocer más →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════ DEMO WHATSAPP ═══════════ -->
+<section id="demo" class="bg-white py-24 px-6">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-14 reveal">
+      <div class="badge mb-5 mx-auto" style="background:#F0FFF4; color:#15803D; border:1px solid #BBF7D0;">
+        <span class="w-1.5 h-1.5 rounded-full animate-pulse inline-block" style="background:#16A34A;"></span>
+        Demo en vivo
+      </div>
+      <h2 class="font-serif text-4xl md:text-5xl mb-4" style="color:#0A2540;">Así vive la experiencia<br/><span class="italic">tu paciente</span></h2>
+      <p class="max-w-lg mx-auto" style="color:rgba(26,35,50,0.6);">Esto es lo que ve un paciente cuando escribe al número de WhatsApp de tu clínica. Sin esperas. Sin personal adicional.</p>
+    </div>
+
+    <div class="reveal flex flex-col lg:flex-row gap-12 items-center justify-center">
+
+      <!-- Phone mockup -->
+      <div class="w-full flex-shrink-0" style="max-width:320px; margin:0 auto;">
+        <div class="rounded-[2.5rem] p-3" style="background:#0A2540; box-shadow: 0 40px 80px rgba(10,37,64,0.4), 0 0 0 2px #1A3D5C;">
+          <!-- Status bar -->
+          <div class="px-5 pt-2 pb-1 flex justify-between items-center text-white/60 text-xs" style="background:#0A2540;">
+            <span>9:41</span>
+            <div class="flex gap-1.5 items-center">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.414-1.414 5 5 0 017.072 0 1 1 0 01-1.416 1.414zM10 17a1 1 0 110-2 1 1 0 010 2z" clip-rule="evenodd"/></svg>
+            </div>
+          </div>
+          <!-- Screen -->
+          <div class="rounded-[2rem] overflow-hidden flex flex-col" style="height:560px;">
+            <!-- WA Header -->
+            <div class="wa-header px-4 py-3 flex items-center gap-3 flex-shrink-0">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center text-xl" style="background:rgba(255,255,255,0.2);">🏥</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-white font-semibold text-sm">Clínica San Martín</div>
+                <div class="text-white/60 text-xs">Agente IA · en línea</div>
+              </div>
+            </div>
+            <!-- Chat -->
+            <div class="wa-screen flex-1 overflow-y-auto px-3 py-4 space-y-3" id="chatScreen">
+              <div class="chat-msg flex justify-start">
+                <div><div class="bubble bubble-patient">Hola, quiero sacar un turno con cardiología</div><div class="bubble-time ml-2">10:32 ✓</div></div>
+              </div>
+              <div class="chat-msg flex justify-end">
+                <div><div class="bubble bubble-ai">¡Hola! 👋 Soy el asistente de la Clínica San Martín. Con gusto te ayudo con Cardiología.<br/><br/>¿Tenés cobertura médica o es particular?</div><div class="bubble-time">10:32 ✓✓</div></div>
+              </div>
+              <div class="chat-msg flex justify-start">
+                <div><div class="bubble bubble-patient">Sí, tengo OSDE 210</div><div class="bubble-time ml-2">10:33 ✓</div></div>
+              </div>
+              <div class="chat-msg flex justify-end">
+                <div><div class="bubble bubble-ai">Perfecto, OSDE 210 tiene cobertura total ✅<br/><br/>Tenemos turnos con el Dr. Ramírez:<br/>📅 <b>Lunes 14 jul — 10:30 hs</b><br/>📅 <b>Miércoles 16 jul — 15:00 hs</b><br/><br/>¿Cuál te queda mejor?</div><div class="bubble-time">10:33 ✓✓</div></div>
+              </div>
+              <div class="chat-msg flex justify-start">
+                <div><div class="bubble bubble-patient">El lunes perfecto</div><div class="bubble-time ml-2">10:34 ✓</div></div>
+              </div>
+              <div class="chat-msg flex justify-end">
+                <div><div class="bubble bubble-ai">¡Listo! 🎉 Tu turno está confirmado:<br/><br/>🏥 Clínica San Martín<br/>👨‍⚕️ Dr. Ramírez — Cardiología<br/>📅 Lunes 14 jul · 10:30 hs<br/><br/>Te mando un recordatorio el domingo. ¿Necesitás algo más?</div><div class="bubble-time">10:34 ✓✓</div></div>
+              </div>
+            </div>
+            <!-- Input bar -->
+            <div class="px-3 py-2 flex items-center gap-2 flex-shrink-0" style="background:rgba(232,244,253,0.6);">
+              <div class="flex-1 bg-white rounded-full px-4 py-2 text-xs" style="color:rgba(26,35,50,0.35);">Escribí un mensaje</div>
+              <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background:#1F7A4D;">
+                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Explanation -->
+      <div class="max-w-md reveal">
+        <h3 class="font-serif text-3xl mb-6" style="color:#0A2540;">Todo esto en<br/><span class="italic" style="color:#00B4D8;">menos de 3 minutos</span></h3>
+        <div class="space-y-5">
+          <div class="flex gap-4 items-start">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm mt-0.5" style="background:rgba(0,180,216,0.1); color:#00B4D8;">1</div>
+            <div><div class="font-medium mb-1" style="color:#0A2540;">El paciente inicia la conversación</div><p class="text-sm" style="color:rgba(26,35,50,0.6);">Sin apps, sin formularios. Solo WhatsApp, que ya tiene instalado.</p></div>
+          </div>
+          <div class="flex gap-4 items-start">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm mt-0.5" style="background:rgba(0,180,216,0.1); color:#00B4D8;">2</div>
+            <div><div class="font-medium mb-1" style="color:#0A2540;">El agente valida la cobertura en tiempo real</div><p class="text-sm" style="color:rgba(26,35,50,0.6);">Obra social, plan y disponibilidad de especialistas, todo automático.</p></div>
+          </div>
+          <div class="flex gap-4 items-start">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm mt-0.5" style="background:rgba(0,180,216,0.1); color:#00B4D8;">3</div>
+            <div><div class="font-medium mb-1" style="color:#0A2540;">El turno queda en tu agenda con recordatorio</div><p class="text-sm" style="color:rgba(26,35,50,0.6);">Tu recepcionista no intervino en ningún momento.</p></div>
+          </div>
+        </div>
+        <!-- ── LINK: Reemplazar con tu WhatsApp Business o Calendly ── -->
+        <a href="#contacto" class="btn-glow mt-8 inline-block">Quiero esto en mi clínica →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════ PROCESO 3 PASOS ═══════════ -->
+<section class="hero-bg py-24 px-6">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-14 reveal">
+      <h2 class="font-serif text-4xl text-white mb-3">Implementación en <span class="italic" style="color:#48CAE4;">3 pasos</span></h2>
+      <p class="text-white/50 max-w-md mx-auto">Sin IT, sin interrumpir tu operación actual, sin meses de integración.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6 reveal">
+      <div class="rounded-2xl p-7 border border-white/10" style="background:rgba(255,255,255,0.05); backdrop-filter:blur(8px);">
+        <div class="text-4xl mb-4">🔍</div>
+        <div class="text-sm mb-2 uppercase tracking-wider font-medium" style="color:#48CAE4;">Paso 1 · Semana 1</div>
+        <h4 class="text-white font-semibold text-lg mb-2">Auditoría de Eficiencia</h4>
+        <p class="text-white/50 text-sm leading-relaxed">Analizamos tu flujo operativo, identificamos los 3 cuellos de botella más costosos y diseñamos el plan de automatización.</p>
+      </div>
+      <div class="rounded-2xl p-7 border border-white/10" style="background:rgba(255,255,255,0.05); backdrop-filter:blur(8px);">
+        <div class="text-4xl mb-4">⚙️</div>
+        <div class="text-sm mb-2 uppercase tracking-wider font-medium" style="color:#48CAE4;">Paso 2 · Semana 2</div>
+        <h4 class="text-white font-semibold text-lg mb-2">Configuración del Agente</h4>
+        <p class="text-white/50 text-sm leading-relaxed">Entrenamos el agente con el contexto de tu clínica: especialidades, coberturas aceptadas y flujos de derivación.</p>
+      </div>
+      <div class="rounded-2xl p-7 border border-white/10" style="background:rgba(255,255,255,0.05); backdrop-filter:blur(8px);">
+        <div class="text-4xl mb-4">🚀</div>
+        <div class="text-sm mb-2 uppercase tracking-wider font-medium" style="color:#48CAE4;">Paso 3 · Semana 3</div>
+        <h4 class="text-white font-semibold text-lg mb-2">Go Live + Soporte</h4>
+        <p class="text-white/50 text-sm leading-relaxed">Lanzamiento, acompañamiento y ajuste fino. Panel de métricas para que veas el impacto en tiempo real.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════ CTA / FORMULARIO ═══════════ -->
+<section id="contacto" class="py-24 px-6" style="background:#E8F4FD;">
+  <div class="max-w-2xl mx-auto reveal">
+    <div class="bg-white rounded-3xl shadow-xl p-10" style="border:1px solid #C9E4F4;">
+      <div class="text-center mb-10">
+        <div class="badge mb-5 mx-auto" style="background:rgba(0,180,216,0.1); color:#0096C7; border:1px solid rgba(0,180,216,0.25);">Sin costo · Sin compromiso</div>
+        <h2 class="font-serif text-4xl mb-3" style="color:#0A2540;">Pedí tu Auditoría<br/><span class="italic">de Eficiencia Gratuita</span></h2>
+        <p style="color:rgba(26,35,50,0.6);">Un especialista analiza tu clínica y te entrega un diagnóstico del tiempo y dinero que podés recuperar.</p>
+      </div>
+
+      <!--
+        ── BACKEND INTEGRATION POINT ──────────────────────────────────────
+        Opciones para conectar este formulario:
+        1. Formspree:  action="https://formspree.io/f/TU_ID" method="POST"
+        2. EmailJS:    sdk de EmailJS en el script del footer
+        3. Webhook:    action="TU_WEBHOOK_ZAPIER_O_MAKE" method="POST"
+        4. Tu backend: action="/api/leads" method="POST"
+        ────────────────────────────────────────────────────────────────── -->
+      <form id="auditForm" class="space-y-4" onsubmit="handleFormSubmit(event)">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1.5" style="color:rgba(26,35,50,0.7);">Nombre *</label>
+            <input type="text" name="nombre" required placeholder="Dr. García" class="form-input" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1.5" style="color:rgba(26,35,50,0.7);">Apellido *</label>
+            <input type="text" name="apellido" required placeholder="Rodríguez" class="form-input" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5" style="color:rgba(26,35,50,0.7);">Email *</label>
+          <!-- ── BACKEND: este campo es el lead principal ── -->
+          <input type="email" name="email" required placeholder="drgarcia@clinica.com.ar" class="form-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5" style="color:rgba(26,35,50,0.7);">Teléfono / WhatsApp</label>
+          <!-- ── BACKEND: usar para follow-up comercial por WhatsApp ── -->
+          <input type="tel" name="telefono" placeholder="+54 11 1234-5678" class="form-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5" style="color:rgba(26,35,50,0.7);">Nombre de tu clínica / consultorio *</label>
+          <input type="text" name="clinica" required placeholder="Clínica San Martín" class="form-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5" style="color:rgba(26,35,50,0.7);">¿Cuántos turnos gestionan por día?</label>
+          <!-- ── BACKEND: usar para segmentar leads por tamaño ── -->
+          <select name="turnos_dia" class="form-input">
+            <option value="" disabled selected>Seleccioná una opción</option>
+            <option value="1-20">Menos de 20</option>
+            <option value="20-50">Entre 20 y 50</option>
+            <option value="50-100">Entre 50 y 100</option>
+            <option value="100+">Más de 100</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5" style="color:rgba(26,35,50,0.7);">¿Cuál es tu mayor problema operativo? (opcional)</label>
+          <textarea name="problema" rows="3" placeholder="Ej: Perdemos turnos porque nadie atiende el teléfono los lunes..." class="form-input resize-none"></textarea>
+        </div>
+        <button type="submit" class="btn-glow w-full text-center mt-2">
+          Solicitar mi Auditoría Gratuita →
+        </button>
+        <p class="text-center text-xs mt-3" style="color:rgba(26,35,50,0.4);">
+          Tu información es confidencial. No hacemos spam.<br/>
+          <!-- ── LINK: Agregar link a tu política de privacidad ── -->
+          <a href="#" class="underline" style="color:#00B4D8;">Política de privacidad</a>
+        </p>
+      </form>
+
+      <!-- Success state -->
+      <div id="formSuccess" class="hidden text-center py-8">
+        <div class="text-5xl mb-4">🎉</div>
+        <h3 class="font-serif text-2xl mb-2" style="color:#0A2540;">¡Solicitud recibida!</h3>
+        <p style="color:rgba(26,35,50,0.6);">Un especialista de BioLogic AI te contactará en las próximas <strong>24 horas hábiles</strong> para coordinar tu auditoría.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="py-12 px-6" style="background:#0A2540;">
+  <div class="max-w-5xl mx-auto">
+    <div class="flex flex-col md:flex-row justify-between items-start gap-8 mb-10">
+      <div class="max-w-xs">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="logo-mark">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 3C5 3 8 5.5 10 10C12 14.5 15 17 15 17" stroke="white" stroke-width="1.8" stroke-linecap="round"/><path d="M15 3C15 3 12 5.5 10 10C8 14.5 5 17 5 17" stroke="rgba(255,255,255,0.5)" stroke-width="1.8" stroke-linecap="round"/><line x1="6.5" y1="6.5" x2="13.5" y2="6.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/><line x1="5.5" y1="10" x2="14.5" y2="10" stroke="white" stroke-width="1.4" stroke-linecap="round"/><line x1="6.5" y1="13.5" x2="13.5" y2="13.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          <span class="text-white font-semibold text-lg">BioLogic <span style="color:#48CAE4;">AI</span></span>
+        </div>
+        <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,0.4);">Agencia de Inteligencia Artificial especializada en automatización para el sector salud en Argentina.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-x-16 gap-y-3 text-sm" style="color:rgba(255,255,255,0.5);">
+        <a href="#problema" class="hover:text-teal-400 transition-colors" style="color:rgba(255,255,255,0.5);">El Problema</a>
+        <a href="#servicios" class="hover:text-teal-400 transition-colors" style="color:rgba(255,255,255,0.5);">Servicios</a>
+        <a href="#demo" class="hover:text-teal-400 transition-colors" style="color:rgba(255,255,255,0.5);">Demo</a>
+        <a href="#contacto" class="hover:text-teal-400 transition-colors" style="color:rgba(255,255,255,0.5);">Contacto</a>
+        <!-- ── LINK: Reemplazar con tu LinkedIn u otras redes ── -->
+        <a href="#" class="hover:text-teal-400 transition-colors" style="color:rgba(255,255,255,0.5);">LinkedIn</a>
+        <a href="#" class="hover:text-teal-400 transition-colors" style="color:rgba(255,255,255,0.5);">Privacidad</a>
+      </div>
+    </div>
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-2 text-xs pt-6" style="border-top:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.3);">
+      <!-- ── TEXT: Actualizar año y razón social ── -->
+      <span>© 2025 BioLogic AI. Todos los derechos reservados.</span>
+      <span>Hecho con IA · Buenos Aires, Argentina 🇦🇷</span>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<script>
+  // ── Navbar scroll effect ──
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('nav-scroll', window.scrollY > 40);
+  });
+
+  // ── Mobile menu ──
+  document.getElementById('menuBtn').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.toggle('hidden');
+  });
+  document.querySelectorAll('#mobileMenu a').forEach(l => {
+    l.addEventListener('click', () => document.getElementById('mobileMenu').classList.add('hidden'));
+  });
+
+  // ── Scroll reveal ──
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ── Smooth scroll with navbar offset ──
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) { e.preventDefault(); window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - 80, behavior: 'smooth' }); }
+    });
+  });
+
+  // ── Form submit ──
+  // ─────────────────────────────────────────────────────────────────────
+  // BACKEND INTEGRATION: Reemplazar el cuerpo de esta función con tu
+  // llamada real a la API (Formspree, EmailJS, tu backend, etc.)
+  // Ejemplo Formspree:
+  //   fetch('https://formspree.io/f/TU_ID', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+  //     .then(() => showSuccess()).catch(console.error);
+  // ─────────────────────────────────────────────────────────────────────
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    const payload = Object.fromEntries(new FormData(document.getElementById('auditForm')).entries());
+    console.log('Lead capturado:', payload); // ← Reemplazar con llamada real
+    showSuccess();
+  }
+
+  function showSuccess() {
+    document.getElementById('auditForm').classList.add('hidden');
+    document.getElementById('formSuccess').classList.remove('hidden');
+  }
+</script>
+
+</body>
+</html>
