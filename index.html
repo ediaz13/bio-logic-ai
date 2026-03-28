@@ -33,6 +33,59 @@
   </script>
 
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- ═══ SEO / Open Graph / Twitter Card ═══ -->
+  <!--
+    INSTRUCCIONES:
+    1. Reemplazá "https://biologicai.com.ar" por tu dominio real
+    2. Creá una imagen 1200×630px y subila como /og-image.jpg
+  -->
+  <link rel="canonical" href="https://biologicai.com.ar/" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph (LinkedIn, WhatsApp, Facebook) -->
+  <meta property="og:type"         content="website" />
+  <meta property="og:url"          content="https://biologicai.com.ar/" />
+  <meta property="og:title"        content="BioLogic AI — Automatizá tu clínica con Agentes de IA" />
+  <meta property="og:description"  content="Gestión de turnos por WhatsApp, validación de órdenes médicas y triaje inteligente. Especializado en el sistema de salud argentino." />
+  <meta property="og:image"        content="https://biologicai.com.ar/og-image.jpg" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt"    content="BioLogic AI — Agencia de IA para el Sector Salud en Argentina" />
+  <meta property="og:locale"       content="es_AR" />
+  <meta property="og:site_name"    content="BioLogic AI" />
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="BioLogic AI — Automatizá tu clínica con Agentes de IA" />
+  <meta name="twitter:description" content="Gestión de turnos por WhatsApp, validación de órdenes médicas y triaje inteligente. Para clínicas y consultorios en Argentina." />
+  <meta name="twitter:image"       content="https://biologicai.com.ar/og-image.jpg" />
+  <!-- <meta name="twitter:site" content="@biologicai" /> -->
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "BioLogic AI",
+    "description": "Agencia de IA especializada en automatización para el sector salud en Argentina.",
+    "url": "https://biologicai.com.ar",
+    "logo": "https://biologicai.com.ar/og-image.jpg",
+    "foundingLocation": {
+      "@type": "Place",
+      "addressCountry": "AR",
+      "addressLocality": "Buenos Aires"
+    },
+    "areaServed": { "@type": "Country", "name": "Argentina" },
+    "serviceType": [
+      "Automatización de turnos médicos",
+      "Validación de órdenes médicas con IA",
+      "Triaje inteligente con chatbot"
+    ],
+    "inLanguage": "es-AR",
+    "sameAs": []
+  }
+  </script>
 </head>
 <body>
 
@@ -104,7 +157,7 @@
       <!-- Lead Magnet -->
       <div class="mt-12 bg-white/90 rounded-2xl shadow-lg p-7 flex flex-col sm:flex-row items-center gap-6 max-w-xl reveal">
         <div class="flex-1">
-          <div class="font-serif text-xl md:text-2xl mb-2 text-navy">¿Cuánto tiempo pierde su secretaría en WhatsApp?</div>
+          <div class="font-serif text-xl md:text-2xl mb-2 text-navy">¿Cuánto tiempo pierde su equipo administrativo en WhatsApp?</div>
           <div class="text-sm text-ink/70 mb-3">Descúbralo en menos de 1 minuto y reciba un diagnóstico personalizado.</div>
         </div>
         <a href="#contacto" class="btn-glow text-center px-7 py-3">Calcular ahora</a>
@@ -152,7 +205,7 @@
           <!-- ── Agregá o quitá filas según los procesos de tu cliente target ── -->
           <tr class="compare-row"><td class="col-label">Gestión de turnos</td><td class="col-old text-center">Llamadas telefónicas, largas esperas, errores humanos</td><td class="col-new text-center">Agente de WhatsApp agenda, confirma y recuerda el turno solo</td></tr>
           <tr class="compare-row"><td class="col-label">Validación de órdenes médicas</td><td class="col-old text-center">Revisión manual, foto por WhatsApp, pérdida de documentos</td><td class="col-new text-center">OCR + IA valida en segundos: obra social, diagnóstico y vigencia</td></tr>
-          <tr class="compare-row"><td class="col-label">Triaje inicial</td><td class="col-old text-center">Recepcionista saturada, sin criterio clínico uniforme</td><td class="col-new text-center">Bot clasifica urgencia y redirige al especialista correcto</td></tr>
+          <tr class="compare-row"><td class="col-label">Triaje inicial</td><td class="col-old text-center">Recepción saturada, sin criterio clínico uniforme</td><td class="col-new text-center">Bot clasifica urgencia y redirige al especialista correcto</td></tr>
           <tr class="compare-row"><td class="col-label">Recordatorios y confirmaciones</td><td class="col-old text-center">Staff dedica 2+ horas diarias a llamar pacientes</td><td class="col-new text-center">Mensajes automáticos 24 hs antes, con link de confirmación</td></tr>
           <tr class="compare-row"><td class="col-label">Consultas frecuentes</td><td class="col-old text-center">Tel. ocupado, paciente llama 3 veces, se va a otra clínica</td><td class="col-new text-center">FAQ respondidas al instante, escalado solo si es necesario</td></tr>
           <tr class="compare-row"><td class="col-label">Disponibilidad</td><td class="col-old text-center">Lunes a viernes, horario de oficina</td><td class="col-new text-center font-semibold">365 días · 24 horas · 0 horas extra</td></tr>
